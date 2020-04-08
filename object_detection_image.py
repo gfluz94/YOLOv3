@@ -45,10 +45,11 @@ class Yolo():
         self.model.setInput(blob)
         return self.model.forward(self.output_layers())
 
-def get_bounding_boxes(network_output, labels, probability_threshold=0.5):
+def get_bounding_boxes(network_output, labels, img_shape, probability_threshold=0.5):
     bounding_boxes = []
     confidences = []
     class_numbers = []
+    height, width = img_shape
     for results in network_output:
         for detection in results:
             scores = detection[5:]
@@ -68,6 +69,7 @@ def non_max_suppresion(boxes, confidences, probability_threshold=0.5, nms_thresh
 
 def show_detected_objects(img, nms_results, boxes, scores, classes, labels, save_img=True, file_name=None):
     counter = 1
+    np.random.seed(1)
     colors = np.random.randint(0, 255, size=(len(labels), 3), dtype="uint8")
     for i in nms_results.flatten():
         text_label = labels[classes[i]]
@@ -105,7 +107,7 @@ if __name__=="__main__":
     
     # Getting boxes and applying Non Maximum Suppression
     probability_threshold = 0.5
-    boxes, scores, classes = get_bounding_boxes(network_output, yolo.labels, probability_threshold)
+    boxes, scores, classes = get_bounding_boxes(network_output, yolo.labels, (height, width), probability_threshold)
     results = non_max_suppresion(boxes, scores, probability_threshold, nms_threshold=0.3)
 
     # Showing final result
